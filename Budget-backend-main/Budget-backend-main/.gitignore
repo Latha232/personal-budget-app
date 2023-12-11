@@ -1,0 +1,22 @@
+/node_modules
+/build
+/dist
+/.git
+
+# IDE
+.vscode
+
+# OS
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+/coverage
+
+/.pnp
+.pnp.js
+
+.env
