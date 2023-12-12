@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts';
-import Axios from 'axios';
 
 const DashboardLineChart = (props) => {
     return (

@@ -108,7 +108,7 @@ const LoginSignupForm = () => {
         setSignUpEmail("");
         setSignUpPassword("");
         setName("");
-        toast.success('Signedup successfully!', {
+        toast.success('Signup successfully!', {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,
@@ -185,7 +185,7 @@ const LoginSignupForm = () => {
         setEmail("");
         setPassword("");
         setName("");
-        toast.success('Login successful!', {
+        toast.success('Login successfully!', {
           position: "top-center",
           autoClose: 3000,
           hideProgressBar: false,

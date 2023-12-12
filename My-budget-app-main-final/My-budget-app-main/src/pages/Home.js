@@ -6,6 +6,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import Axios from 'axios'
 import DashboardChart from '../components/DashboardChart';
 import DashboardLineChart from '../components/DashboardLineChart';
+import PieChartComponent from '../components/PieChartComponent';
+
 
 function Home() {
     const navigate = useNavigate()
@@ -28,7 +30,9 @@ function Home() {
     const [loading, setLoading] = useState(false)
     const [search, setSearch] = useState('')
     const [chartData, setChartData] = useState([])
+    const [pieChartData, setPieChartData] = useState([])
     const [year, setYear] = useState(new Date().getFullYear())
+    const [closeModal, setCloseModal] = useState(false)
 
     const categoryOptions = [
         { value: "", label: "Select Category" },
@@ -199,7 +203,7 @@ function Home() {
         }
     }, [])
 
-    const getAllBudgets = async () => {
+    const getAllBudgets = () => {
         Axios.get('https://moneydiet.onrender.com/budget/get-budgets', {
             headers: {
                 authorization: localStorage.getItem('budget-token'),
@@ -211,24 +215,38 @@ function Home() {
         })
     }
 
-    const getChartData = async () => {
+    const getChartData = () => {
         Axios.get('https://moneydiet.onrender.com/budget/get-net-by-month/' + year, {
             headers: {
                 authorization: localStorage.getItem('budget-token'),
             },
+        }).then(({ data }) => {
+            setChartData(data.data)
+        }).catch((err) => {
+            console.log(err)
         })
-            .then(({ data }) => {
-                setChartData(data.data)
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+    }
+
+    const getChartDataByCategory = () => {
+        Axios.get('https://moneydiet.onrender.com/budget/get-net-by-category', {
+            headers: {
+                authorization: localStorage.getItem('budget-token'),
+            },
+        }).then(({ data }) => {
+            if (data.status === 200) {
+                console.log(data.data)
+                setPieChartData(data.data)
+            }
+        }).catch((err) => {
+            console.log(err)
+        })
     }
 
     useEffect(() => {
         getAllBudgets()
         getChartData()
-    }, [deleteBudget, update])
+        getChartDataByCategory()
+    }, [])
 
     const columns = [
         {
@@ -290,9 +308,60 @@ function Home() {
         }
     ]
 
+    // Write code to show a modal on 10 second of inactivity
+    const updateExpireTime = () => {
+        const expireTime = new Date().getTime() + 10000
+        localStorage.setItem('expire-time', expireTime)
+    }
+
+    const checkForInactivity = () => {
+        const currentTime = new Date().getTime()
+        const expireTime = localStorage.getItem('expire-time')
+        if (currentTime > expireTime) {
+            setCloseModal(true)
+        }
+    }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            checkForInactivity()
+        }, 10000)
+
+        return () => {
+            clearInterval(interval)
+        }
+    }, [])
+
+
+    useEffect(() => {
+        updateExpireTime()
+        window.addEventListener('mousemove', updateExpireTime)
+        window.addEventListener('scroll', updateExpireTime)
+        window.addEventListener('keypress', updateExpireTime)
+        window.addEventListener('click', updateExpireTime)
+        window.addEventListener('load', updateExpireTime)
+        window.addEventListener('touchstart', updateExpireTime)
+        window.addEventListener('touchmove', updateExpireTime)
+        window.addEventListener('touchend', updateExpireTime)
+        window.addEventListener('touchcancel', updateExpireTime)
+
+        return () => {
+            window.removeEventListener('mousemove', updateExpireTime)
+            window.removeEventListener('scroll', updateExpireTime)
+            window.removeEventListener('keypress', updateExpireTime)
+            window.removeEventListener('click', updateExpireTime)
+            window.removeEventListener('load', updateExpireTime)
+            window.removeEventListener('touchstart', updateExpireTime)
+            window.removeEventListener('touchmove', updateExpireTime)
+            window.removeEventListener('touchend', updateExpireTime)
+            window.removeEventListener('touchcancel', updateExpireTime)
+        }
+
+    }, [])
+
+
     return (
         <>
-            {/* Logout Button */}
             <div className='logout-btn'>
                 <button className='btn btn-danger' onClick={() => {
                     localStorage.removeItem('budget-token')
@@ -316,11 +385,14 @@ function Home() {
             <div className="container">
                 <h1 className='mt-5 home-heading'>Budget Tracker</h1>
                 <div className="row">
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <DashboardChart data={chartData} />
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <DashboardLineChart data={chartData} />
+                    </div>
+                    <div className="col-md-4">
+                        <PieChartComponent data={pieChartData} />
                     </div>
                 </div>
             </div>
@@ -560,6 +632,32 @@ function Home() {
                                                 </div> : 'Update'
                                             }
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
+            <Modal
+                open={closeModal}
+                onClose={() => {
+                    localStorage.removeItem('budget-token')
+                    navigate('/login')
+                }}
+                aria-labelledby='modal-modal-title'
+                aria-describedby='modal-modal-description'
+            >
+                <div className='container'>
+                    <div className='row'>
+                        <div className='col-md-6 offset-md-3'>
+                            <div className='card mt-5'>
+                                <div className='card-header'>
+                                    <h3>Session Expired</h3>
+                                </div>
+                                <div className='card-body'>
+                                    <div>
+                                        <h5>Your session has been expired due to inactivity. Please login again to continue.</h5>
                                     </div>
                                 </div>
                             </div>

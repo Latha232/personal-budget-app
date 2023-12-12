@@ -60,10 +60,10 @@ router.post('/login', async (req, res) => {
                     let token = getToken(email);
                     return res.json({ status: 200, message: 'Login successful', token: token });
                 } else {
-                    return res.json({ status: 800, message: 'The password you entered is wrong!' });
+                    return res.json({ status: 800, message: 'The password you enetered is wrong!' });
                 }
             } else {
-                return res.json({ status: 800, message: 'User does not exist! Please sign-up instead.' });
+                return res.json({ status: 800, message: 'User does not exit! Please sign-up instead.' });
             }
         })
         .catch((err) => {

@@ -133,16 +133,104 @@ router.delete('/delete-budget/:id', verifyToken, (req, res) => {
         });
 });
 
-router.get('/get-budgets-by-category/:category', verifyToken, (req, res) => {
+router.get('/get-net-by-category', verifyToken, async (req, res) => {
     const email = req.user.email;
-    const category = sanitize(req.params.category);
-    budget.find({ category: category, userEmail: email })
-        .then((budgets) => {
-            return res.json({ status: 200, budgets: budgets });
+
+    let budgets = await budget.find({ userEmail: email })
+    const categoryOptions = [
+        { value: "", label: "Select Category" },
+        { value: 'Groceries', label: 'Groceries' },
+        { value: 'Bills', label: 'Bills' },
+        { value: 'Rent', label: 'Rent' },
+        { value: 'Salary', label: 'Salary' },
+        { value: 'Food', label: 'Food' },
+        { value: 'Travel', label: 'Travel' },
+        { value: 'Shopping', label: 'Shopping' },
+        { value: 'Others', label: 'Others' },
+    ]
+
+    let data = [
+        {
+            category: "Groceries",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Bills",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Rent",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Salary",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Food",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Travel",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Shopping",
+            credit: 0,
+            debit: 0,
+            net: 0
+        },
+        {
+            category: "Others",
+            credit: 0,
+            debit: 0,
+            net: 0
+        }
+    ]
+
+    try {
+        budgets.forEach((budget) => {
+            data.find((item) => {
+                if (budget.category === "") {
+                    item.net += budget.amount;
+                    if (budget.amount > 0) {
+                        item.credit += budget.amount;
+                    }
+                    else {
+                        item.debit += Math.abs(budget.amount);
+                    }
+                }
+
+                else if (item.category === budget.category) {
+                    item.net += budget.amount;
+                    if (budget.amount > 0) {
+                        item.credit += budget.amount;
+                    }
+                    else {
+                        item.debit += Math.abs(budget.amount);
+                    }
+                }
+            })
         })
-        .catch((err) => {
-            return res.json({ status: 800, error: err });
-        });
+
+        return res.json({ status: 200, data: data });
+    }
+    catch (err) {
+        return res.json({ status: 800, error: err });
+    }
+
 });
 
 router.get('/get-net-by-month/:year', verifyToken, async (req, res) => {
